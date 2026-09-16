@@ -1,8 +1,9 @@
 FROM python:3.11-slim
 
-# Install ffmpeg for yt-dlp to merge audio/video
+# Install system dependencies (ffmpeg is required by yt-dlp, libnss3 for curl_cffi)
 RUN apt-get update && \
-    apt-get install -y ffmpeg curl && \
+    apt-get install -y ffmpeg libnss3 && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
