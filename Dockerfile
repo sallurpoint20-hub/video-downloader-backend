@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11
 
 # Install system dependencies (ffmpeg is required by yt-dlp, libnss3 for curl_cffi)
 RUN apt-get update && \
