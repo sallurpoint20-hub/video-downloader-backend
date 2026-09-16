@@ -30,12 +30,15 @@ DOWNLOAD_DIR = os.path.join(os.path.expanduser('~'), 'Downloads', 'VideoDownload
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
 
-# Common yt-dlp options to bypass bot detection without curl_cffi
-# Uses Android/iOS player clients which don't trigger "sign in" checks on datacenter IPs
+# Common yt-dlp options to bypass bot detection
+# Uses cookies from a real browser session so YouTube treats the server as a logged-in user
+COOKIES_FILE = os.path.join(os.path.dirname(__file__), 'cookies.txt')
+
 COMMON_YDL_OPTS = {
     'extractor_args': {
         'youtube': {
             'player_client': ['mweb', 'android'],
+            'player_skip': ['webpage'],
         }
     },
     'http_headers': {
@@ -46,6 +49,13 @@ COMMON_YDL_OPTS = {
     'retries': 3,
     'no_warnings': True,
 }
+
+# If cookies.txt exists, use it to authenticate with YouTube
+if os.path.exists(COOKIES_FILE):
+    COMMON_YDL_OPTS['cookiefile'] = COOKIES_FILE
+    print(f"[INFO] Using cookies from {COOKIES_FILE}")
+else:
+    print(f"[WARN] No cookies.txt found at {COOKIES_FILE} — YouTube may block requests")
 
 class DownloadRequest(BaseModel):
     url: str
