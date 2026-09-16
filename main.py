@@ -3,7 +3,6 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import yt_dlp
-from yt_dlp.networking.impersonate import ImpersonateTarget
 import uuid
 import os
 import threading
@@ -30,6 +29,23 @@ downloads = {}
 DOWNLOAD_DIR = os.path.join(os.path.expanduser('~'), 'Downloads', 'VideoDownloader')
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
+
+# Common yt-dlp options to bypass bot detection without curl_cffi
+# Uses Android/iOS player clients which don't trigger "sign in" checks on datacenter IPs
+COMMON_YDL_OPTS = {
+    'extractor_args': {
+        'youtube': {
+            'player_client': ['mweb', 'android'],
+        }
+    },
+    'http_headers': {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+    },
+    'socket_timeout': 30,
+    'retries': 3,
+    'no_warnings': True,
+}
 
 class DownloadRequest(BaseModel):
     url: str
@@ -61,10 +77,10 @@ def create_progress_hook(download_id: str):
 
 def download_task(url: str, format_type: str, quality: str, download_id: str):
     ydl_opts = {
+        **COMMON_YDL_OPTS,
         'outtmpl': os.path.join(DOWNLOAD_DIR, f"{download_id}.%(ext)s"),
         'progress_hooks': [create_progress_hook(download_id)],
         'quiet': False, 
-        'impersonate': ImpersonateTarget(client='chrome'),
     }
     
     if format_type == 'audio':
@@ -161,8 +177,9 @@ async def get_status(download_id: str):
 async def analyze_video(req: AnalyzeRequest):
     try:
         ydl_opts = {
+            **COMMON_YDL_OPTS,
             'quiet': True,
-            'impersonate': ImpersonateTarget(client='chrome'),
+            'skip_download': True,
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(req.url, download=False)
