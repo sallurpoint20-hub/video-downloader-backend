@@ -19,6 +19,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "Video Downloader API is running"}
+
 # In-memory storage for download statuses
 # Format: { download_id: {"status": "downloading" | "completed" | "error", "progress": int, "error": str} }
 downloads = {}
