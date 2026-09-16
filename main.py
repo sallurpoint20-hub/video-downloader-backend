@@ -108,10 +108,13 @@ def download_task(url: str, format_type: str, quality: str, download_id: str):
             'writethumbnail': True,
         })
     else:
-        video_format = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+        # Use flexible format selection — mobile player clients may not have
+        # separate mp4+m4a streams, so we provide broad fallback chains
         if quality != "best":
             height = quality.replace("p", "")
-            video_format = f"bestvideo[height<={height}][ext=mp4]+bestaudio[ext=m4a]/best[height<={height}][ext=mp4]/best"
+            video_format = f"bestvideo[height<={height}]+bestaudio/best[height<={height}]/best"
+        else:
+            video_format = "bestvideo+bestaudio/best"
         ydl_opts.update({
             'format': video_format,
             'merge_output_format': 'mp4',
