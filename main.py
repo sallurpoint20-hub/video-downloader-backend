@@ -32,7 +32,7 @@ if not os.path.exists(DOWNLOAD_DIR):
 
 # Common yt-dlp options to bypass bot detection
 # Uses cookies from a real browser session so YouTube treats the server as a logged-in user
-COOKIES_FILE = os.path.join(os.path.dirname(__file__), 'cookies.txt')
+COOKIES_FILE = os.path.join(os.path.dirname(__file__), 'www.youtube.com_cookies.txt')
 
 COMMON_YDL_OPTS = {
     'extractor_args': {
