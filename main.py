@@ -3,7 +3,6 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import yt_dlp
-from yt_dlp.networking.impersonate import ImpersonateTarget
 import uuid
 import os
 import threading
@@ -64,7 +63,6 @@ def download_task(url: str, format_type: str, quality: str, download_id: str):
         'outtmpl': os.path.join(DOWNLOAD_DIR, f"{download_id}.%(ext)s"),
         'progress_hooks': [create_progress_hook(download_id)],
         'quiet': False, 
-        'impersonate': ImpersonateTarget(client='chrome'),
     }
     
     if format_type == 'audio':
@@ -162,7 +160,6 @@ async def analyze_video(req: AnalyzeRequest):
     try:
         ydl_opts = {
             'quiet': True,
-            'impersonate': ImpersonateTarget(client='chrome'),
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(req.url, download=False)
